@@ -1,8 +1,10 @@
 use actix_web::{get, App, HttpResponse, HttpServer, Responder, web};
 use aws_sdk_s3::Client;
+use handlers::post_ac;
 
 mod models;
 mod store;
+mod handlers;
 
 #[get("/hello")]
 async fn hello() -> impl Responder {
@@ -56,6 +58,7 @@ async fn main() -> std::io::Result<()> {
             .service(hello)
             .service(get_data)
             .service(get_problems)
+            .service(post_ac)
     })
     .bind(format!("0.0.0.0:{port}"))?
     .run()
