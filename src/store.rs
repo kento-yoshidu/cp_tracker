@@ -30,3 +30,23 @@ pub async fn read_json(client: web::Data<Client>) -> Option<Vec<Problem>> {
         }
     }
 }
+
+pub async fn write_json(client: web::Data<Client>, problems: &Vec<Problem>) -> Option<()> {
+    let data = serde_json::to_string_pretty(problems).ok()?;
+
+    if std::env::var("USE_LOCAL_FILE").is_ok() {
+        std::fs::write("problems.json", data).ok()
+    } else {
+        let bucket = std::env::var("S3_BUCKET").unwrap();
+
+        client
+            .put_object()
+            .bucket(&bucket)
+            .key("problems.json")
+            .body(data.into_bytes().into())
+            .send()
+            .await
+            .ok()
+            .map(|_| ())
+    }
+}
